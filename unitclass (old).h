@@ -6,10 +6,6 @@ using namespace std;
 
 int masterArray[GRID_SIZE][GRID_SIZE][2];
 
-int tarType, tarStrength, tarHP, tarPosX, tarPosY, tarArmour;
-int ctrlType, ctrlStrength, ctrlPosX, ctrlPosY, ctrlAA, ctrlAT, ctrlDmg;
-
-
 class Unit
 {
 	public:
@@ -19,18 +15,15 @@ class Unit
 		int armour;
 		int unitType; // 1: infantry, 2: mech. inf. (AT), 3: mech. inf (AA), 4: light tank, 5: heavy tank, 6: atrillery, 7: aircraft, 8: SAM system
 		int active;
-		int arrayID;
 
 // SETTERS
 
-		void setAttr(int type, int flag, string name, int id)
-		{	
-			arrayID = id;
+		void setAttr(int type, int flag, string name)
+		{
 			allegiance = flag;
 			unitType = type;
 			unitName = name;
 			active = 1;
-			movePool = 2;
 			switch (allegiance)
 			{
 				case 1:
@@ -55,7 +48,7 @@ class Unit
 					hitPoints = 1;
 					antiArmour = 1;
 					antiAircraft = 1;
-					mobility = 3;
+					mobility = 5;
 					range = 1;
 					break;
 				
@@ -66,7 +59,7 @@ class Unit
 					hitPoints = 2;
 					antiArmour = 7;
 					antiAircraft = 1;
-					mobility = 6;
+					mobility = 10;
 					range = 1;
 					break;
 				
@@ -77,7 +70,7 @@ class Unit
 					hitPoints = 2;
 					antiArmour = 2;
 					antiAircraft = 7;
-					mobility = 6;
+					mobility = 10;
 					range = 1;
 					break;
 
@@ -88,8 +81,8 @@ class Unit
 					hitPoints = 8;
 					antiArmour = 6;
 					antiAircraft = 0;
-					mobility = 10;
-					range = 4;
+					mobility = 20;
+					range = 6;
 					break;
 
 				case 5:
@@ -99,7 +92,7 @@ class Unit
 					hitPoints = 10;
 					antiArmour = 9;
 					antiAircraft = 0;
-					mobility = 8;
+					mobility = 15;
 					range = 6;
 					break;
 				
@@ -110,18 +103,18 @@ class Unit
 					hitPoints = 4;
 					antiArmour = 9;
 					antiAircraft = 0;
-					mobility = 0;
-					range = 8;
+					mobility = 2;
+					range = 16;
 					break;
 
 				case 7:
-					unitStrength = 4;
+					unitStrength = 1;
 					damageEffect = 16;
 					armour =  2;
 					hitPoints = 4;
 					antiArmour = 6;
 					antiAircraft = 6;
-					mobility = 24;
+					mobility = 64;
 					range = 16;
 					break;
 
@@ -133,7 +126,7 @@ class Unit
 					antiArmour = 2;
 					antiAircraft = 8;
 					mobility = 0;
-					range = 8;
+					range = 10;
 					break;
 				
 				default:
@@ -143,7 +136,7 @@ class Unit
 					hitPoints = 1;
 					antiArmour = 1;
 					antiAircraft = 1;
-					mobility = 3;
+					mobility = 5;
 					range = 1;
 					break;
 
@@ -202,34 +195,38 @@ class Unit
 			}
 		}
 
-		int scanAround()
+		// for movement of infantry, manually add code at end of move() to set entrenchment variable to 0
+		int move(int a, char dir) // dir is direction of movement, dir = 'x' along x axis, 'y' along y axis 
 		{
-			for (int i = posX - 2; i <= posX + 2; i++)
-				{
-					for(int j = posY - 2; posY <= posY + 2; j++)
-					{
-						if (masterArray[i][j][1] == 1)
-						{	
-
-							return 1;
-						} else
-						{
-							return 0;
-						}
-					}
-				}
-		}
-
-		int move(int x, int y)
-		{
-			if ((((posX - x)*(posX - x) + (posY -y)*(posY - y)) <= mobility*mobility) && movePool > 0)
+			if ((a <= movePool) && (dir == 'x') && (masterArray[posX + a][posY][0] == 0))
 			{	
-				masterArray[posX][posY][0] = 0;
-				masterArray[posX][posY][1] = 0;
-
-				movePool--;
+				prevPosX = posX;
+				posX = posX + a;
+				movePool = movePool - a;
 				return 1;
-			} else
+			} 
+			if ((a <= movePool) && (dir == 'y') && (masterArray[posX][posY + a][0] == 0))
+			{	
+				prevPosY = posY;
+				posY = posY + a;
+				movePool = movePool - a;
+				return 1;
+			}
+			if ((a <= movePool) && (dir == 'Y') && (masterArray[posX][posY + a][0] == 0))
+			{	
+				prevPosY = posY;
+				posY = posY + a;
+				movePool = movePool + a;
+				return 1;
+			}
+			if ((a <= movePool) && (dir == 'X') && (masterArray[posX + a][posY][0] == 0))
+			{	
+				prevPosX = posX;
+				posX = posX + a;
+				movePool = movePool + a;
+				return 1;
+			}
+			else 
 			{
 				return 0;
 			}
@@ -237,22 +234,7 @@ class Unit
 
 		void resetMove()
 		{
-			movePool = 2;
-		}
-
-		void assignCtrl()
-		{
-
-		}
-
-		void assignTar()
-		{
-
-		}
-
-		void setTarAttr()
-		{
-
+			movePool = mobility;
 		}
 
 	private:
@@ -270,7 +252,6 @@ class Unit
 		int mobility;
 		int range;
 		int damageEffect;
-
 };
 
 class Infantry : public Unit
@@ -299,7 +280,4 @@ class Infantry : public Unit
 			}
 		}	
 };
-
-//Unit *userArray[];
-//Unit *scriptArray[];
 
