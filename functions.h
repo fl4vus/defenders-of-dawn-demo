@@ -12,25 +12,46 @@ float rando()
     return bro;
 }
 
-float poolArmr(int armr, int antiArmr)
+float poolArmr(int armr, int antiArmr, int antiAir, int tarType)
 {   
     float prob;
-    if (armr > antiArmr)
+    if (tarType != 7)
     {
-        prob = (10.0 - ((float)armr - (float)antiArmr))/10.0;
-        cout << "probility of hit = "<< prob << endl;
+        if (armr >= antiArmr)
+        {
+            prob = (10.0 - ((float)armr - (float)antiArmr))/10.0;
+            cout << "probility of hit = "<< prob << endl;
+        }
+        if (armr < antiArmr)
+        {
+            prob = 1.000;
+        }
     }
-    if (armr < antiArmr)
-    {
-        prob = 1.000;
+    
+    if (tarType == 7)
+    {   
+        cout << "\nSwitching to Anti-Air Mode" << endl;
+        float prob0 = (float)antiAir/10.000;
+        cout << "anti-air capability = " << prob0 << endl;
+        if (armr >= antiArmr)
+        {
+            prob = prob0*((10.0 - ((float)armr - (float)antiArmr))/10.0);
+            cout << "probility of hit = "<< prob << endl;
+        }
+        if (armr < antiArmr)
+        {
+            prob = 1.000 * prob0;
+            cout << "probility of hit = "<< prob << endl;
+        }
+
     }
     return prob;
 }
 
-int checkHit(int armr, int antiArmr)
+int checkHit(int armr, int antiArmr, int antiAir, int tarType)
 {
     float random = rando();
-    float armrCoeff = poolArmr(armr, antiArmr);
+    float armrCoeff = poolArmr(armr, antiArmr, antiAir, tarType);
     int ok;
     if (random <= armrCoeff)
     {
