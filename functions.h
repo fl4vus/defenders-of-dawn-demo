@@ -2,15 +2,18 @@
 #include <string.h> 
 #include <time.h>
 using namespace std;
+#define RANDO (float) rand()/RAND_MAX;
 
-float rando()
+
+
+/*float rando()
 {  
-    srand( (unsigned)time( NULL ) );
+    srand(time(0)) ;
     float bro;
     bro = (float) rand()/RAND_MAX;
     cout <<"random = "<< bro << endl;
     return bro;
-}
+}*/
 
 float poolArmr(int armr, int antiArmr, int antiAir, int tarType)
 {   
@@ -50,7 +53,9 @@ float poolArmr(int armr, int antiArmr, int antiAir, int tarType)
 
 int checkHit(int armr, int antiArmr, int antiAir, int tarType)
 {
-    float random = rando();
+    float random = RANDO;
+    cout << "random: " << random;
+    cout << endl;
     float armrCoeff = poolArmr(armr, antiArmr, antiAir, tarType);
     int ok;
     if (random <= armrCoeff)
