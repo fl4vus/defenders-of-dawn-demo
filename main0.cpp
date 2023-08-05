@@ -68,10 +68,11 @@ int main()
     Unit *userArray[16] = {&userInf1, &userInf2, &userInf3, &userInf4, &userMI1, &userMI2, &userArt1, &userArt2, &userLgtTnk1, &userHvyTnk1, &userAir1, &userAir2, &userSAM1, &userSAM2};
     Unit *scriptArray[14] = {&scptInf1, &scptInf2, &scptInf3, &scptMI1, &scptMI2, &scptMI3, &scptLgtTnk1, &scptLgtTnk2, &scptHvyTnk1, &scptHvyTnk2, &scptAir1, &scptAir2, &scptSAM1, &scptSAM2};
 
+    int uSize = sizeof(userArray)/sizeof(userArray[0]);
+    int sSize = sizeof(scriptArray)/sizeof(scriptArray[0]);
+
     userInf1.setAttr(1,1,"Alpha Coy. 1st Plt.",1);
-    userArray[0] = &userInf1;
     userInf1.setPos(12,8);
-    // cout << "\nunit: " << masterArray[12][8][0] << "\nFlag: " << masterArray[12][8][1] << endl;
     userInf2.setAttr(1,1,"Alpha Coy. 2nd Plt.",2);
     userInf2.setPos(9,10);
     userInf3.setAttr(1,1,"Delta Coy. 1st Plt.",3);
@@ -117,12 +118,26 @@ int main()
     
     while (runStat == 1)
     {   
-
+        newturn: 
         turn = turn + 1;
+        
+        for (int i = 0; i < 14; i++)
+        {
+            userArray[i]->resetMove();
+        }
+
+        for (int j = 0; j < 14; j++)
+        {
+            scriptArray[j]->resetMove();
+        }
+
         //int arr[32][32];
         int selectUnit = 0;
         int selectAction = 0;
         int selectTarget = 0;
+
+        int msgDump;
+        string dumpMsg;
 
         drawmap:
         system("clear");
@@ -220,16 +235,23 @@ int main()
             }
             printf("\n");
         }
+
+        if (msgDump == 1)
+        {
+            cout << "\n\033[1;33m" << dumpMsg << "\033[1;0m" << endl;
+            msgDump = 0;
+        }
         /*cout << "\n" << it << ": run again? enter 1 to run again, enter 0 to stop\n";
         cin >> runStat;*/
         cout << "\nTurn: "<< turn << endl;
         if (selectUnit == 0)
         {
-            cout << "Select Unit:" << endl;
+            cout << "Select Unit:\n" << endl;
             for (int i = 0; i < 14; i++)
             {
                 printf("\033[1;32m%d. %s \033[1;0m(%d, %d)\n", userArray[i]->arrayID, userArray[i]->unitName.c_str(), userArray[i]->getPosX(), userArray[i]->getPosY());
             }
+            printf("\n\033[1;36m15. Next Turn\033[1;0m\n");
             cout << "\n(input no. next to item)" << endl;
             cin >> selectUnit;
             if (selectUnit < 15 && selectUnit > 0)
@@ -237,18 +259,27 @@ int main()
                 ctrlUnit = userArray[selectUnit - 1];
                 goto drawmap;
             } else
-            {
-                cout << "\nInvalid input!"<< endl;
-                selectUnit = 0;
-                goto drawmap;
+            {   
+                switch(selectUnit)
+                {
+                    case 15:
+                        goto newturn;
+                    default:
+                        msgDump = 1;
+                        dumpMsg = "INVALID INPUT";
+                        selectUnit = 0;
+                        goto drawmap;
+                        break;
+                }
             }
         } else 
         {
             if (selectAction == 0)
             {   
                 printf("Selected Unit: \033[1;32m%s \033[1;0m\n\n", ctrlUnit->unitName.c_str());
+                cout<<"Position: \033[1;32m("<<ctrlUnit->getPosX()<<", "<<ctrlUnit->getPosY()<<")\033[1;0m"<<"\nUnit Strength: \033[1;32m"<<ctrlUnit->unitStrength<<"\033[1;0m\nStatus: \033[1;32m"<<ctrlUnit->getStatus()<<"\033[1;0m\n"<<endl;
                 cout << "Select Action: " << endl;
-                cout << "1. Move\n2. Engage\n3. Change Unit" << endl;
+                cout << "\033[1;36m1. Move\n2. Engage\n3. Change Unit\033[1;0m" << endl;
                 cout << "\n(input no. next to item)" << endl;
                 cin >> selectAction;
                 
@@ -261,13 +292,17 @@ int main()
                         cin >> Xer;
                         cout << "\nEnter new Y co-ordinate: ";
                         cin >> Yer;
-                        if (ctrlUnit->move(Xer, Yer) == 1)
-                        {
-                            ctrlUnit->setPos(Xer, Yer);
-                        } else
-                        {
-                            cout << "\nInvalid Move!";
+                        switch (ctrlUnit->move(Xer, Yer))
+                        {   
+                            case 1:
+                                ctrlUnit->setPos(Xer, Yer);
+                                break;
+                            default:
+                                msgDump = 1;
+                                dumpMsg = "INVALID MOVE (selected unit has either run out of moves, or destination is out of range)";
+                                break;
                         }
+                        selectAction = 0;
                         goto drawmap;
                         break;
                     case 2:
@@ -279,7 +314,8 @@ int main()
                         goto drawmap;
                         break;
                     default:
-                        cout << "\nInvalid input!" << endl;
+                        msgDump = 1;
+                        dumpMsg = "INVALID INPUT";
                         selectAction = 0;
                         goto drawmap;
                         break;
