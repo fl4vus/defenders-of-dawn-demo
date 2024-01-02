@@ -1,0 +1,2 @@
+1. Switch scattered units to script and lefthand units to user
+2. Add script for movement of pc aircraft and autoengaement by script
